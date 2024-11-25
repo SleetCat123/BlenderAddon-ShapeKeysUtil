@@ -116,8 +116,7 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
     need_apply_modifier = False
     for modifier in source_obj.modifiers:
         if modifier.show_render or remove_nonrender:
-            if modifier.name.startswith(consts.APPLY_AS_SHAPEKEY_PREFIX) or (
-                    modifier.name.startswith(consts.FORCE_APPLY_MODIFIER_PREFIX) or modifier.type != 'ARMATURE'):
+            if modifier.name.startswith(consts.FORCE_APPLY_MODIFIER_PREFIX) or modifier.type != 'ARMATURE':
                 need_apply_modifier = True
                 break
     print(f"{source_obj.name}: Need Apply Modifiers: {str(need_apply_modifier)}")
