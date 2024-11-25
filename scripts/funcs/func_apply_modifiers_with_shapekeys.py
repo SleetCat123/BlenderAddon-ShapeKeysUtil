@@ -40,7 +40,7 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
             print(f"apply as shape: {modifier.name}[{str(apply_as_shape_index)}]")
             break
     if apply_as_shape_index == 0:
-        # Apply as shapekey用のモディファイアが一番上にあったらApply as shapekeyを実行
+        # Apply as shapekey用のモディファイアが一番上にあったらモディファイアをシェイプキーとして適用
         print("%AS% modifier is top")
         func_apply_as_shapekey.apply_as_shapekey(apply_as_shape_modifier)
         # 関数を再実行して終了
@@ -65,7 +65,7 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
         for modifier in source_obj.modifiers[apply_as_shape_index:]:
             bpy.ops.object.modifier_remove(modifier=modifier.name)
 
-        # 関数を再実行
+        # 関数を再実行し、Apply as shapekeyより前のモディファイアを適用
         print("re-execute apply_modifiers_with_shapekeys (1)")
         apply_modifiers_with_shapekeys(self, remove_nonrender)
 
@@ -79,7 +79,7 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
         print("temp: " + str(tempobj))
         print("source: " + str(source_obj))
         func_object_utils.set_active_object(source_obj)
-        # 適用済みのモディファイアを削除
+        # 適用済みのモディファイアを削除。これでモディファイアの1番目がApply as shapekey用のモディファイアになる
         for modifier in source_obj.modifiers[:apply_as_shape_index]:
             bpy.ops.object.modifier_remove(modifier=modifier.name)
 
