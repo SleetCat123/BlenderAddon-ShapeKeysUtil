@@ -25,6 +25,32 @@ from ..funcs import func_shapekey_utils
 def apply_as_shapekey(modifier):
     try:
         obj = func_object_utils.get_active_object()
+
+        if modifier.type == "SURFACE_DEFORM" and modifier.is_bound and modifier.target and modifier.target.data.shape_keys and len(modifier.target.data.shape_keys.key_blocks) > 1 and modifier.target.data.shape_keys.key_blocks[0].name == "All":
+            # SurfaceDeformモディファイアのターゲットオブジェクトにシェイプキーが2つ以上存在していて、最初のシェイプキーの名前が"All"ならshow_only_shape_keyをTrueにしてシェイプキーを個別にシェイプキーとして適用
+            temp_show_only_shape_key = modifier.target.show_only_shape_key
+            temp_active_shape_key_index = bpy.context.object.active_shape_key_index
+
+            modifier.target.show_only_shape_key = True
+            key_blocks = modifier.target.data.shape_keys.key_blocks
+            len_key_blocks = len(key_blocks)
+            for i in range(1, len_key_blocks):
+                key = key_blocks[i]
+                print(f"add shapekey: {key.name}")
+                bpy.context.object.active_shape_key_index = i
+
+                if i == len_key_blocks - 1:
+                    keep_modifier = False
+                else:
+                    keep_modifier = True
+                bpy.ops.object.modifier_apply_as_shapekey(keep_modifier=keep_modifier, modifier=modifier.name)
+                # シェイプキー名を変更
+                new_shapekey = obj.data.shape_keys.key_blocks[-1]
+                new_shapekey.name = key.name
+            modifier.target.show_only_shape_key = temp_show_only_shape_key
+            bpy.context.object.active_shape_key_index = temp_active_shape_key_index
+            return
+
         # 名前の文字列から%AS%を削除する
         shape_name = modifier.name[len(consts.APPLY_AS_SHAPEKEY_PREFIX):len(modifier.name)]
         # 名前の文字列から$以降を削除する
