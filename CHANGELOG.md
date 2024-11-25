@@ -1,5 +1,9 @@
 
 ## ◆更新履歴
+
+### 2024-11-25 v2.1.0
+- remove: ShapeKeys Util → Apply ModifiersのDuplicateチェックボックスを廃止
+
 ### 2024-09-11 v2.0.2
 - fix: アドオン連携機能の実行時にエラーが出る不具合を修正
 ---

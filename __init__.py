@@ -21,7 +21,7 @@ from .scripts.funcs.utils import func_package_utils
 bl_info = {
     "name": "ShapeKeys Util",
     "author": "@sleetcat123(Twitter)",
-    "version": (2, 0, 2),
+    "version": (2, 1, 0),
     "blender": (2, 80, 0),
     "location": "",
     "description": "",

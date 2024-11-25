@@ -29,11 +29,6 @@ class OBJECT_OT_specials_shapekeys_util_apply_modifiers(bpy.types.Operator):
     bl_description = "Apply all modifiers except for Armature.\nCan use even if has a shape key.\nWarning: It may take a while"
     bl_options = {'REGISTER', 'UNDO'}
 
-    duplicate: BoolProperty(
-        name="Duplicate",
-        default=False,
-        description="Execute the function on the copied object"
-    )
     remove_nonrender: BoolProperty(
         name="Remove NonRender",
         default=True,
@@ -55,7 +50,7 @@ class OBJECT_OT_specials_shapekeys_util_apply_modifiers(bpy.types.Operator):
 
             for obj in targets:
                 func_object_utils.set_active_object(obj)
-                func_apply_modifiers_with_shapekeys.apply_modifiers_with_shapekeys(self, self.duplicate, self.remove_nonrender)
+                func_apply_modifiers_with_shapekeys.apply_modifiers_with_shapekeys(self, self.remove_nonrender)
             func_object_utils.select_objects(selected_objects, True)
             func_object_utils.set_active_object(active)
             return {'FINISHED'}

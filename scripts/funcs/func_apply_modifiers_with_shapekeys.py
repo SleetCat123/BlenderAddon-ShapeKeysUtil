@@ -27,7 +27,7 @@ from ..funcs.utils import func_object_utils
 
 
 # シェイプキーをもつオブジェクトのモディファイアを適用
-def apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender=True):
+def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
     source_obj = func_object_utils.get_active_object()
     print("apply_modifiers_with_shapekeys: [{0}] [{1}]".format(source_obj.name, source_obj.type))
     # Apply as shapekey用モディファイアのインデックスを検索
@@ -45,7 +45,7 @@ def apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender=True):
         func_apply_as_shapekey.apply_as_shapekey(apply_as_shape_modifier)
         # 関数を再実行して終了
         print("re-execute apply_modifiers_with_shapekeys")
-        apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender)
+        apply_modifiers_with_shapekeys(self, remove_nonrender)
         return
     elif apply_as_shape_index >= 1:
         # 2番目以降にApply as shape用のモディファイアがあったら
@@ -67,7 +67,7 @@ def apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender=True):
 
         # 関数を再実行
         print("re-execute apply_modifiers_with_shapekeys (1)")
-        apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender)
+        apply_modifiers_with_shapekeys(self, remove_nonrender)
 
         # 削除していたモディファイアを一時オブジェクトから復元
         print("restore modifiers")
@@ -91,7 +91,7 @@ def apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender=True):
 
         # 関数を再実行して終了
         print("re-execute apply_modifiers_with_shapekeys (2)")
-        apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender)
+        apply_modifiers_with_shapekeys(self, remove_nonrender)
         return
 
     if source_obj.data.shape_keys and len(source_obj.data.shape_keys.key_blocks) == 1:
@@ -105,9 +105,6 @@ def apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender=True):
         # シェイプキーがなければモディファイア適用処理だけ実行
         print("only apply_modifiers: " + source_obj.name)
         func_apply_modifiers.apply_modifiers(remove_nonrender=remove_nonrender)
-        if duplicate:
-            print("duplicate: " + source_obj.name)
-            func_object_utils.duplicate_object(source_obj)
         return
 
     # 対象オブジェクトだけを選択
@@ -125,10 +122,6 @@ def apply_modifiers_with_shapekeys(self, duplicate, remove_nonrender=True):
                 break
     print(f"{source_obj.name}: Need Apply Modifiers: {str(need_apply_modifier)}")
     if need_apply_modifier:
-        if duplicate:
-            # オブジェクトを複製
-            source_obj_dup = func_object_utils.duplicate_object(source_obj)
-            print(f"Duplicate: {source_obj_dup.name}")
         func_object_utils.select_object(source_obj, True)
         func_object_utils.set_active_object(source_obj)
 
