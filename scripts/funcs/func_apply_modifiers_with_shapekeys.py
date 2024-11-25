@@ -121,9 +121,6 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
                 break
     print(f"{source_obj.name}: Need Apply Modifiers: {str(need_apply_modifier)}")
     if need_apply_modifier:
-        func_object_utils.select_object(source_obj, True)
-        func_object_utils.set_active_object(source_obj)
-
         # シェイプキーの名前と数値を記憶
         active_shape_key_index = source_obj.active_shape_key_index
         shapekey_name_and_values = []
