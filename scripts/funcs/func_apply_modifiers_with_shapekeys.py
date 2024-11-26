@@ -26,8 +26,54 @@ from ..funcs import (
 from ..funcs.utils import func_object_utils
 
 
+def partial_apply_modifiers(source_obj, modifier_index, remove_nonrender):
+    # 2番目以降にmodifier_index用のモディファイアがあったら
+    # 一時オブジェクトを作成
+    print("create tempobj")
+    tempobj = func_object_utils.duplicate_object(source_obj)
+    func_object_utils.deselect_all_objects()
+    func_object_utils.select_object(tempobj, True)
+    print("duplicate: " + tempobj.name)
+    func_object_utils.set_active_object(source_obj)
+    # モディファイアを一時オブジェクトにコピー
+    print("copyto temp: make_links_data(type='MODIFIERS')")
+    bpy.ops.object.make_links_data(type='MODIFIERS')
+
+    # modifier_indexとそれよりあとのモディファイアを削除
+    for modifier in source_obj.modifiers[modifier_index:]:
+        bpy.ops.object.modifier_remove(modifier=modifier.name)
+
+    # 関数を再実行し、modifier_indexより前のモディファイアを適用
+    print("re-execute apply_modifiers_with_shapekeys (1)")
+    apply_modifiers_with_shapekeys(remove_nonrender)
+
+    # 削除していたモディファイアを一時オブジェクトから復元
+    print("restore modifiers")
+    func_object_utils.deselect_all_objects()
+    func_object_utils.select_object(source_obj, True)
+    func_object_utils.set_active_object(tempobj)
+    print("restore: make_links_data(type='MODIFIERS')")
+    bpy.ops.object.make_links_data(type='MODIFIERS')
+    print("temp: " + str(tempobj))
+    print("source: " + str(source_obj))
+    func_object_utils.set_active_object(source_obj)
+    # 適用済みのモディファイアを削除。これでモディファイアの1番目がmodifier_index用のモディファイアになる
+    for modifier in source_obj.modifiers[:modifier_index]:
+        bpy.ops.object.modifier_remove(modifier=modifier.name)
+
+    # 一時オブジェクトを削除
+    print("remove tempobj")
+    func_object_utils.remove_object(tempobj)
+    func_object_utils.select_object(source_obj, True)
+    func_object_utils.set_active_object(source_obj)
+
+    # 関数を再実行して終了
+    print("re-execute apply_modifiers_with_shapekeys (2)")
+    apply_modifiers_with_shapekeys(remove_nonrender)
+
+
 # シェイプキーをもつオブジェクトのモディファイアを適用
-def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
+def apply_modifiers_with_shapekeys(remove_nonrender=True):
     source_obj = func_object_utils.get_active_object()
     print("apply_modifiers_with_shapekeys: [{0}] [{1}]".format(source_obj.name, source_obj.type))
     # Apply as shapekey用モディファイアのインデックスを検索
@@ -45,53 +91,12 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
         func_apply_as_shapekey.apply_as_shapekey(apply_as_shape_modifier)
         # 関数を再実行して終了
         print("re-execute apply_modifiers_with_shapekeys")
-        apply_modifiers_with_shapekeys(self, remove_nonrender)
+        apply_modifiers_with_shapekeys(remove_nonrender)
         return
     elif apply_as_shape_index >= 1:
         # 2番目以降にApply as shape用のモディファイアがあったら
         print("%AS% modifier is not top")
-        # 一時オブジェクトを作成
-        print("create tempobj")
-        tempobj = func_object_utils.duplicate_object(source_obj)
-        func_object_utils.deselect_all_objects()
-        func_object_utils.select_object(tempobj, True)
-        print("duplicate: " + tempobj.name)
-        func_object_utils.set_active_object(source_obj)
-        # モディファイアを一時オブジェクトにコピー
-        print("copyto temp: make_links_data(type='MODIFIERS')")
-        bpy.ops.object.make_links_data(type='MODIFIERS')
-
-        # Apply as shapekeyとそれよりあとのモディファイアを削除
-        for modifier in source_obj.modifiers[apply_as_shape_index:]:
-            bpy.ops.object.modifier_remove(modifier=modifier.name)
-
-        # 関数を再実行し、Apply as shapekeyより前のモディファイアを適用
-        print("re-execute apply_modifiers_with_shapekeys (1)")
-        apply_modifiers_with_shapekeys(self, remove_nonrender)
-
-        # 削除していたモディファイアを一時オブジェクトから復元
-        print("restore modifiers")
-        func_object_utils.deselect_all_objects()
-        func_object_utils.select_object(source_obj, True)
-        func_object_utils.set_active_object(tempobj)
-        print("restore: make_links_data(type='MODIFIERS')")
-        bpy.ops.object.make_links_data(type='MODIFIERS')
-        print("temp: " + str(tempobj))
-        print("source: " + str(source_obj))
-        func_object_utils.set_active_object(source_obj)
-        # 適用済みのモディファイアを削除。これでモディファイアの1番目がApply as shapekey用のモディファイアになる
-        for modifier in source_obj.modifiers[:apply_as_shape_index]:
-            bpy.ops.object.modifier_remove(modifier=modifier.name)
-
-        # 一時オブジェクトを削除
-        print("remove tempobj")
-        func_object_utils.remove_object(tempobj)
-        func_object_utils.select_object(source_obj, True)
-        func_object_utils.set_active_object(source_obj)
-
-        # 関数を再実行して終了
-        print("re-execute apply_modifiers_with_shapekeys (2)")
-        apply_modifiers_with_shapekeys(self, remove_nonrender)
+        partial_apply_modifiers(source_obj, apply_as_shape_index, remove_nonrender)
         return
 
     if source_obj.data.shape_keys and len(source_obj.data.shape_keys.key_blocks) == 1:
@@ -105,6 +110,49 @@ def apply_modifiers_with_shapekeys(self, remove_nonrender=True):
         # シェイプキーがなければモディファイア適用処理だけ実行
         print("only apply_modifiers: " + source_obj.name)
         func_apply_modifiers.apply_modifiers(remove_nonrender=remove_nonrender)
+        return
+    
+    # シェイプキーがある場合、SurfaceDeformモディファイアはBasisシェイプに対して適用される
+    surface_deform_index = -1
+    for i, modifier in enumerate(source_obj.modifiers):
+        if modifier.type == 'SURFACE_DEFORM':
+            surface_deform_index = i
+            break
+    if surface_deform_index == 0:
+        # SurfaceDeformモディファイアが一番上にあったら
+        print("SurfaceDeform modifier is top")
+        # オブジェクトを複製
+        temp_obj = func_object_utils.duplicate_object(source_obj)
+        func_object_utils.deselect_all_objects()
+        func_object_utils.select_object(temp_obj, True)
+        func_object_utils.set_active_object(temp_obj)
+
+        # 複製したオブジェクトのシェイプキーをすべて削除
+        temp_obj.active_shape_key_index = 0
+        bpy.ops.object.shape_key_remove(all=True, apply_mix=False)
+        # 複製したオブジェクトのSurfaceDeformモディファイアを適用
+        bpy.ops.object.modifier_apply(modifier=temp_obj.modifiers[0].name)
+
+        # 複製したオブジェクトから元オブジェクトにJoin as shape
+        func_object_utils.select_object(source_obj, True)
+        func_object_utils.set_active_object(source_obj)
+        bpy.ops.object.join_shapes()
+        # 複製したオブジェクトを削除
+        func_object_utils.remove_object(temp_obj)
+
+        # join as shapeしたシェイプキーをBasisに転送
+        source_obj.active_shape_key_index = len(source_obj.data.shape_keys.key_blocks) - 1
+        bpy.ops.object.shape_key_move(type='TOP')
+        # join as shapeしたシェイプキーを削除
+        bpy.ops.object.shape_key_remove()
+
+        # 関数を再実行して終了
+        apply_modifiers_with_shapekeys(remove_nonrender)
+        return
+    if surface_deform_index >= 1:
+        # SurfaceDeformモディファイアが2番目以降にあったら
+        print("SurfaceDeform modifier is not top")
+        partial_apply_modifiers(source_obj, surface_deform_index, remove_nonrender)
         return
 
     # 対象オブジェクトだけを選択
