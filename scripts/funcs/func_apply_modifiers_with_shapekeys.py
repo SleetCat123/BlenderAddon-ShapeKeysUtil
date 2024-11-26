@@ -141,10 +141,22 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         func_object_utils.remove_object(temp_obj)
 
         # join as shapeしたシェイプキーをBasisに転送
-        source_obj.active_shape_key_index = len(source_obj.data.shape_keys.key_blocks) - 1
-        bpy.ops.object.shape_key_move(type='TOP')
+        last_shapekey_index = len(source_obj.data.shape_keys.key_blocks) - 1
+        temp_mode = source_obj.mode
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.reveal()
+        bpy.ops.mesh.select_all(action='SELECT')
+        last_shapekey_name = source_obj.data.shape_keys.key_blocks[last_shapekey_index].name
+        bpy.ops.mesh.blend_from_shape(shape=last_shapekey_name, blend=1)
+
         # join as shapeしたシェイプキーを削除
+        bpy.ops.object.mode_set(mode='OBJECT')
+        source_obj.active_shape_key_index = last_shapekey_index
         bpy.ops.object.shape_key_remove()
+
+        if temp_mode != 'OBJECT':
+            # 元のモードに戻す
+            bpy.ops.object.mode_set(mode=temp_mode)
 
         # 元オブジェクトのSurfaceDeformモディファイアを削除
         bpy.ops.object.modifier_remove(modifier=source_obj.modifiers[0].name)
