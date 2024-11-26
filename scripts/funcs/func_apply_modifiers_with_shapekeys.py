@@ -146,6 +146,9 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         # join as shapeしたシェイプキーを削除
         bpy.ops.object.shape_key_remove()
 
+        # 元オブジェクトのSurfaceDeformモディファイアを削除
+        bpy.ops.object.modifier_remove(modifier=source_obj.modifiers[0].name)
+
         # 関数を再実行して終了
         apply_modifiers_with_shapekeys(remove_nonrender)
         return
