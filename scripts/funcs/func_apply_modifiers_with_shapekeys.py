@@ -147,6 +147,8 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         bpy.ops.mesh.reveal()
         bpy.ops.mesh.select_all(action='SELECT')
         last_shapekey_name = source_obj.data.shape_keys.key_blocks[last_shapekey_index].name
+        # Basisをアクティブにする
+        source_obj.active_shape_key_index = 0
         bpy.ops.mesh.blend_from_shape(shape=last_shapekey_name, blend=1)
 
         # join as shapeしたシェイプキーを削除
