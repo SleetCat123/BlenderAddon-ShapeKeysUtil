@@ -133,6 +133,8 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         # 複製したオブジェクトのSurfaceDeformモディファイアを適用
         bpy.ops.object.modifier_apply(modifier=temp_obj.modifiers[0].name)
 
+        temp_active_shape_key_index = source_obj.active_shape_key_index
+        
         # 複製したオブジェクトから元オブジェクトにJoin as shape
         func_object_utils.select_object(source_obj, True)
         func_object_utils.set_active_object(source_obj)
@@ -150,6 +152,7 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         # Basisをアクティブにする
         source_obj.active_shape_key_index = 0
         bpy.ops.mesh.blend_from_shape(shape=last_shapekey_name, blend=1)
+        source_obj.active_shape_key_index = temp_active_shape_key_index
 
         # join as shapeしたシェイプキーを削除
         bpy.ops.object.mode_set(mode='OBJECT')
