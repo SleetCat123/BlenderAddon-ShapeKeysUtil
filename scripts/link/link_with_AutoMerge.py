@@ -17,7 +17,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-from ..funcs.func_apply_modifiers_with_shapekeys import apply_modifiers_with_shapekeys
+from ..funcs import func_apply_modifiers_with_shapekeys
 
 
 # シェイプキーをもつオブジェクトのモディファイアを適用
@@ -28,8 +28,8 @@ class OBJECT_OT_apply_modifiers_with_shapekeys_for_automerge_addon(bpy.types.Ope
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        print("ShapekeysUtil")
-        apply_modifiers_with_shapekeys(remove_nonrender=True)
+        print("ShapekeysUtil - link_with_AutoMerge")
+        func_apply_modifiers_with_shapekeys.apply_modifiers_with_shapekeys(remove_nonrender=True)
         return {'FINISHED'}
 
 

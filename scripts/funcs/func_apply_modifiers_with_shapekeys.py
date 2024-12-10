@@ -27,6 +27,7 @@ from ..funcs.utils import func_object_utils
 
 
 def partial_apply_modifiers(source_obj, modifier_index, remove_nonrender):
+    print("func_apply_modifiers_with_shapekeys - partial_apply_modifiers")
     # 2番目以降にmodifier_index用のモディファイアがあったら
     # 一時オブジェクトを作成
     print("create tempobj")
@@ -75,7 +76,7 @@ def partial_apply_modifiers(source_obj, modifier_index, remove_nonrender):
 # シェイプキーをもつオブジェクトのモディファイアを適用
 def apply_modifiers_with_shapekeys(remove_nonrender=True):
     source_obj = func_object_utils.get_active_object()
-    print("apply_modifiers_with_shapekeys: [{0}] [{1}]".format(source_obj.name, source_obj.type))
+    print(f"apply_modifiers_with_shapekeys: [{source_obj.name}] [{source_obj.type}]  {len(source_obj.modifiers)} modifiers")
     # Apply as shapekey用モディファイアのインデックスを検索
     apply_as_shape_index = -1
     apply_as_shape_modifier = None
@@ -83,7 +84,7 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         if modifier.name.startswith(consts.APPLY_AS_SHAPEKEY_PREFIX):
             apply_as_shape_index = i
             apply_as_shape_modifier = modifier
-            print(f"apply as shape: {modifier.name}[{str(apply_as_shape_index)}]")
+            print(f"%AS% modifier is found: {str(apply_as_shape_index)} - {modifier.name}")
             break
     if apply_as_shape_index == 0:
         # Apply as shapekey用のモディファイアが一番上にあったらモディファイアをシェイプキーとして適用
@@ -98,6 +99,8 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         print("%AS% modifier is not top")
         partial_apply_modifiers(source_obj, apply_as_shape_index, remove_nonrender)
         return
+    else:
+        print("%AS% modifier is not found")
 
     if source_obj.data.shape_keys and len(source_obj.data.shape_keys.key_blocks) == 1:
         # Basisしかなければシェイプキー削除
@@ -117,6 +120,7 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
     for i, modifier in enumerate(source_obj.modifiers):
         if modifier.type == 'SURFACE_DEFORM':
             surface_deform_index = i
+            print(f"SurfaceDeform modifier is found: {str(surface_deform_index)} - {modifier.name}")
             break
     if surface_deform_index == 0:
         # SurfaceDeformモディファイアが一番上にあったら
@@ -174,6 +178,8 @@ def apply_modifiers_with_shapekeys(remove_nonrender=True):
         print("SurfaceDeform modifier is not top")
         partial_apply_modifiers(source_obj, surface_deform_index, remove_nonrender)
         return
+    else:
+        print("SurfaceDeform modifier is not found")
 
     # 対象オブジェクトだけを選択
     func_object_utils.deselect_all_objects()

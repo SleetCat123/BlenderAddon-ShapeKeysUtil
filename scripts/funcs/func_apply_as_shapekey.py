@@ -25,19 +25,26 @@ from ..funcs import func_shapekey_utils
 def apply_as_shapekey(modifier):
     try:
         obj = func_object_utils.get_active_object()
-
-        if modifier.type == "SURFACE_DEFORM" and modifier.is_bound and modifier.target and modifier.target.data.shape_keys and len(modifier.target.data.shape_keys.key_blocks) > 1 and modifier.target.data.shape_keys.key_blocks[0].name == "All":
+        print(f"ShapeKeysUtil - func_apply_as_shapekey: {modifier.name}")
+        if (modifier.type == "SURFACE_DEFORM" 
+            and modifier.is_bound 
+            and modifier.target 
+            and modifier.target.data.shape_keys 
+            and len(modifier.target.data.shape_keys.key_blocks) > 1 
+            and modifier.target.data.shape_keys.key_blocks[0].name == "All"):
             # SurfaceDeformモディファイアのターゲットオブジェクトにシェイプキーが2つ以上存在していて、最初のシェイプキーの名前が"All"ならshow_only_shape_keyをTrueにしてシェイプキーを個別にシェイプキーとして適用
-            temp_show_only_shape_key = modifier.target.show_only_shape_key
-            temp_active_shape_key_index = modifier.target.active_shape_key_index
+            print("Add shapekeys from SurfaceDeform")
+            mod_target = modifier.target
+            temp_show_only_shape_key = mod_target.show_only_shape_key
+            temp_active_shape_key_index = mod_target.active_shape_key_index
 
-            modifier.target.show_only_shape_key = True
-            key_blocks = modifier.target.data.shape_keys.key_blocks
+            mod_target.show_only_shape_key = True
+            key_blocks = mod_target.data.shape_keys.key_blocks
             len_key_blocks = len(key_blocks)
             for i in range(1, len_key_blocks):
                 key = key_blocks[i]
                 print(f"add shapekey: {key.name}")
-                modifier.target.active_shape_key_index = i
+                mod_target.active_shape_key_index = i
 
                 if i == len_key_blocks - 1:
                     keep_modifier = False
@@ -47,8 +54,8 @@ def apply_as_shapekey(modifier):
                 # シェイプキー名を変更
                 new_shapekey = obj.data.shape_keys.key_blocks[-1]
                 new_shapekey.name = key.name
-            modifier.target.show_only_shape_key = temp_show_only_shape_key
-            modifier.target.active_shape_key_index = temp_active_shape_key_index
+            mod_target.show_only_shape_key = temp_show_only_shape_key
+            mod_target.active_shape_key_index = temp_active_shape_key_index
             return
 
         # 名前の文字列から%AS%を削除する
@@ -108,6 +115,6 @@ def apply_as_shapekey(modifier):
         raise Exception(warn)
     else:
         try:
-            print("Apply as shapekey: [{0}]".format(modifier.name))
+            print("func_apply_as_shapekey: [{0}]".format(modifier.name))
         except UnicodeDecodeError:
-            print("Apply as shapekey")
+            print("func_apply_as_shapekey")
